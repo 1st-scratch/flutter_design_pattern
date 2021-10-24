@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key, required this.title}) : super(key: key);
@@ -10,22 +13,23 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  int _counter = 0;
+  String _zipcode = '';
+  String _address = '';
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  void _decrementCounter() {
+  Future _search() async {
+    if (_zipcode.isEmpty) {
+      return;
+    }
+    var url = Uri.parse('https://zipcloud.ibsnet.co.jp/api/search?zipcode=$_zipcode&limit=1');
+    var response = await http.get(url);
+    var data = json.decode(response.body);
+    var result = data['results'][0];
+    var address1 = result['address1'];
+    var address2 = result['address2'];
+    var address3 = result['address3'];
+    debugPrint(response.body);
     setState((){
-      _counter--;
+      _address = '$address1$address2$address3';
     });
   }
 
@@ -41,25 +45,31 @@ class _SearchPageState extends State<SearchPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                onChanged: (text) {
+                  debugPrint(text);
+                  setState((){
+                    _zipcode = text.replaceAll('-', '');
+                  });
+                },
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: '郵便番号を入力してください',
-                  hintText: '000-0000',
+                  hintText: '0000000',
                   enabled: true,
                 ),
               ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _decrementCounter,
+                  onPressed: _search,
                   child: const Text(
                     '住所検索'
                   ),
                 ),
               ),
               Text(
-                '東京都新宿区四谷4-28-14',
+                _address,
                 style: Theme.of(context).textTheme.bodyText1,
               ),
             ],
