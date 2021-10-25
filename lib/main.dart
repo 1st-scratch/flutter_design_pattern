@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'view/search_page.dart';
 
 void main() {
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SearchPage(title: 'サンプルアプリ(MVVM)'),
+      home: SearchPage(title: 'サンプルアプリ(MVVM)'),
     );
   }
 }

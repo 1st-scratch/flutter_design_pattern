@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_design_pattern/view_model/search_view_model.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_design_pattern/search_actions.dart';
+import 'package:flutter_design_pattern/app_state.dart';
+import 'package:flutter_design_pattern/middleware.dart';
+import 'package:flutter_design_pattern/reducer.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
 class SearchPage extends StatelessWidget {
-  const SearchPage({Key? key, required this.title}) : super(key: key);
+  SearchPage({Key? key, required this.title}) : super(key: key);
   final String title;
+
+  final Store<AppState> store = Store(reducer, initialState: const AppState('', ''), middleware: [middleware]);
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SearchViewModel()),
-      ],
+    return StoreProvider(
+      store: store,
       child: Scaffold(
         appBar: AppBar(
           title: Text(title),
@@ -33,11 +37,6 @@ class _SearchPageBodyState extends State<_SearchPageBody> {
   @override
   void initState() {
     super.initState();
-
-    var viewModel = Provider.of<SearchViewModel>(context, listen: false);
-    viewModel.searchSuccessAction.stream.listen((_) {
-      debugPrint('success!!');
-    });
   }
 
   @override
@@ -64,21 +63,22 @@ class _SearchPageBodyState extends State<_SearchPageBody> {
 class _ZipcodeTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
-          return TextField(
-            onChanged: (text) {
-              debugPrint(text);
-              viewModel.zipcode = text;
-            },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '郵便番号を入力してください',
-              hintText: '0000000',
-              enabled: true,
-            ),
-          );
-        }
+    return StoreConnector(
+        distinct: true,
+        converter: (Store<AppState> store) => store.state.zipcode,
+        builder: (context, zipcode) =>
+            TextField(
+              onChanged: (text) {
+                debugPrint(text);
+                zipcode = text;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '郵便番号を入力してください',
+                hintText: '0000000',
+                enabled: true,
+              ),
+            )
     );
   }
 }
@@ -86,10 +86,12 @@ class _ZipcodeTextField extends StatelessWidget {
 class _SearchButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
+    return StoreConnector<AppState, String>(
+        distinct: true,
+        converter: (Store<AppState> store) => store.dispatch(SearchAddressAction()),
+        builder: (context, callback) {
           return ElevatedButton(
-              onPressed: (){ viewModel.search(); },
+              onPressed: () => { callback },
               child: const Text(
                   '住所検索'
               )
@@ -102,10 +104,12 @@ class _SearchButton extends StatelessWidget {
 class _AddressText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
+    return StoreConnector(
+        distinct: true,
+        converter: (Store<AppState> store) => store.state.address,
+        builder: (context, address) {
           return Text(
-            viewModel.address,
+            '$address',
             style: Theme.of(context).textTheme.bodyText1,
           );
         }
