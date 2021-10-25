@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_design_pattern/view_model/search_view_model.dart';
+import 'package:flutter_design_pattern/bloc/search_bloc.dart';
+import 'package:flutter_design_pattern/util/event.dart';
 import 'package:provider/provider.dart';
 
 class SearchPage extends StatelessWidget {
@@ -10,7 +11,10 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SearchViewModel()),
+        Provider<SearchBloc>(
+          create: (context) => SearchBloc(),
+          dispose: (context, bloc) => bloc.dispose(),
+        ),
       ],
       child: Scaffold(
         appBar: AppBar(
@@ -33,11 +37,6 @@ class _SearchPageBodyState extends State<_SearchPageBody> {
   @override
   void initState() {
     super.initState();
-
-    var viewModel = Provider.of<SearchViewModel>(context, listen: false);
-    viewModel.searchSuccessAction.stream.listen((_) {
-      debugPrint('success!!');
-    });
   }
 
   @override
@@ -64,21 +63,18 @@ class _SearchPageBodyState extends State<_SearchPageBody> {
 class _ZipcodeTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
-          return TextField(
-            onChanged: (text) {
-              debugPrint(text);
-              viewModel.zipcode = text;
-            },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '郵便番号を入力してください',
-              hintText: '0000000',
-              enabled: true,
-            ),
-          );
-        }
+    final searchBloc = Provider.of<SearchBloc>(context);
+    return TextField(
+      onChanged: (text) {
+        debugPrint(text);
+        searchBloc.zipcode = text;
+      },
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: '郵便番号を入力してください',
+        hintText: '0000000',
+        enabled: true,
+      ),
     );
   }
 }
@@ -86,15 +82,12 @@ class _ZipcodeTextField extends StatelessWidget {
 class _SearchButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
-          return ElevatedButton(
-              onPressed: (){ viewModel.search(); },
-              child: const Text(
-                  '住所検索'
-              )
-          );
-        }
+    final searchBloc = Provider.of<SearchBloc>(context);
+    return ElevatedButton(
+        onPressed: (){ searchBloc.searchAction.add(Event()); },
+        child: const Text(
+            '住所検索'
+        )
     );
   }
 }
@@ -102,13 +95,19 @@ class _SearchButton extends StatelessWidget {
 class _AddressText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SearchViewModel>(
-        builder: (context, viewModel, _) {
-          return Text(
-            viewModel.address,
-            style: Theme.of(context).textTheme.bodyText1,
-          );
-        }
+    final searchBloc = Provider.of<SearchBloc>(context);
+    return StreamBuilder(
+      initialData: '',
+      stream: searchBloc.searchResult,
+      builder: (context, snapshot) {
+        return Text(
+          searchBloc.address,
+          style: Theme
+              .of(context)
+              .textTheme
+              .bodyText1,
+        );
+      }
     );
   }
 }
