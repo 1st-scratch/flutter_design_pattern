@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_design_pattern/search_actions.dart';
+import 'package:flutter_design_pattern/actions/search_actions.dart';
 import 'package:flutter_design_pattern/app_state.dart';
-import 'package:flutter_design_pattern/middleware.dart';
-import 'package:flutter_design_pattern/reducer.dart';
+import 'package:flutter_design_pattern/middlewares/middleware.dart';
+import 'package:flutter_design_pattern/reducers/reducer.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
