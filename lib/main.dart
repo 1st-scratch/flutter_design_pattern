@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'search_page.dart';
+import 'view/search_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutterサンプルアプリ(*)',
+      title: 'サンプルアプリ(MVVM)',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SearchPage(title: 'Flutterサンプルアプリ(*)'),
+      home: const SearchPage(title: 'サンプルアプリ(MVVM)'),
     );
   }
 }
