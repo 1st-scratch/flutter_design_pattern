@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_design_pattern/repository/address_repository.dart';
 import 'package:flutter_design_pattern/util/event.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'dart:convert';
 
 class SearchViewModel extends ChangeNotifier {
   String _zipcode = '';
@@ -22,15 +21,9 @@ class SearchViewModel extends ChangeNotifier {
       return;
     }
 
-    var url = Uri.parse('https://zipcloud.ibsnet.co.jp/api/search?zipcode=$_zipcode&limit=1');
-    var response = await http.get(url);
-    var data = json.decode(response.body);
-    var result = data['results'][0];
-    var address1 = result['address1'];
-    var address2 = result['address2'];
-    var address3 = result['address3'];
-    debugPrint(response.body);
-    _address = '$address1$address2$address3';
+    var address = await AddressRepository().fetchAddressRepository(_zipcode);
+    debugPrint(address.address);
+    _address = address.address;
 
     notifyListeners();
     _searchSuccessAction.sink.add(Event());
